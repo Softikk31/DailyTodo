@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,24 +22,17 @@ import dev.jorik.dailytodo.domain.Task
 import dev.jorik.dailytodo.ui.screen.components.EditTaskDialog
 import dev.jorik.dailytodo.ui.screen.components.TaskCard
 import dev.jorik.dailytodo.ui.screen.components.TimeMarker
+import dev.jorik.dailytodo.viewmodels.TasksViewModel
 
 @Composable
 fun DailyTasksScreen() {
     var selectedTask by remember { mutableStateOf<Task?>(null) }
 
-    val items: List<DailyItem> = listOf(
-        Task(id = 1, title = "Помыть посуду", completed = false),
-        AppTime(time = "13:19", delta = 0),
-        Task(id = 2, title = "Развесить стирку", completed = false),
-        AppTime(time = "14:00", delta = -10),
-        Task(id = 3, title = "Купить продукты", completed = false),
-        Task(id = 4, title = "Выкинуть мусор", completed = false),
-        Task(id = 5, title = "Погулять с собакой", completed = false)
-    )
+    val tasksViewModel = TasksViewModel()
+    val items: List<DailyItem> by tasksViewModel.tasks.collectAsState()
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background
+        modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -49,9 +43,7 @@ fun DailyTasksScreen() {
             items(items) { item ->
                 when (item) {
                     is Task -> TaskCard(
-                        task = item,
-                        onTaskClick = { selectedTask = item }
-                    )
+                        task = item, onTaskClick = { selectedTask = item })
 
                     is AppTime -> TimeMarker(appTime = item)
                 }
@@ -61,9 +53,7 @@ fun DailyTasksScreen() {
 
     selectedTask?.let { task ->
         EditTaskDialog(
-            task = task,
-            onDismiss = { selectedTask = null }
-        )
+            task = task, onDismiss = { selectedTask = null })
     }
 }
 
